@@ -9,7 +9,7 @@ from twisted.internet import reactor
 if useWSGI: from twisted.application import internet, service
 
 import sys, time, os, atexit
-print "Done!"
+print " OK!"
 
 #set working directory
 if os.path.dirname(__file__):
@@ -22,7 +22,7 @@ else:
 		os.chdir(path)
 		break
 	else:
-		print "Can't force working directory, may fail crash!"
+		print "Unable to set working directory, the server may crash!"
 
 #Logging
 class Log:
@@ -99,14 +99,14 @@ Log = Log()
 #init database:
 print "Initializing flipnote database...",
 from database import Database
-print "Done!"
+print " OK!"
 
 #Setup hatena server:
 print "Setting up hatena site...",
 import hatena
 hatena.ServerLog = Log
 site = server.Site(hatena.Setup())
-print "Done!"
+print " OK!"
 
 
 #make the hatena server accept proxy connections:
@@ -130,7 +130,7 @@ def buildProtocol(self, addr):
 	return protocol
 funcType = type(site.buildProtocol)
 site.buildProtocol = funcType(buildProtocol, site, server.Site)
-print "Done!"
+print " OK!"
 
 #run!
 print "Server start!\n"

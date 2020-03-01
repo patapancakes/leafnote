@@ -20,7 +20,7 @@ class AccessDenied(resource.Resource):
 		print "debug:",request.getAllHeaders()
 		
 		request.setResponseCode(403)
-		return "403 - Access denied\nThis proxy is only allowed to use for Flipnote Hatena for the DSi."
+		return "403 - Access denied\nThis proxy is only intended for use on the DSi"
 AccessDenied = AccessDenied()
 class NotFound(resource.Resource):
 	isLeaf = True
@@ -30,7 +30,7 @@ class NotFound(resource.Resource):
 		
 		ServerLog.write("%s got 404 when requesting \"%s\"" % (request.getClientIP(), path), Silent)
 		request.setResponseCode(404)
-		return "404 - Not Found\nThis proxy is only allowed to use for Flipnote Hatena for the DSi."
+		return "404 - Not Found\nThis proxy is only intended for use on the DSi"
 NotFound = NotFound()
 class ConnectionTest(resource.Resource):#used for people setting up the proxy in their DSi. It's nice to see it's actually working.
 	#http://conntest.nintendowifi.net/
@@ -72,7 +72,7 @@ class Root(resource.Resource):#filters out non-hantena clients
 		if request.getHost() == "conntest.nintendowifi.net":
 			return ConnectionTest
 		Log(request, "root")
-		return "Welcome to hatena.pbsds.net!\nThis is still in early stages, so please don't expect too much."
+		return "Welcome to Leafnote!\nThis is still in early stages, so please don't expect too much."
 class ds(resource.Resource):#child of Root
 	isLeaf = False
 	def __init__(self):
@@ -162,7 +162,7 @@ class FolderResource(resource.Resource):
 	def render(self, request):
 		path = "/".join(request.path.split("/")[3:])
 		Log(request, path)
-		return "I am a folder, but I'm to lazy to list my contents..."
+		return "Folder contents cannot be shown."
 def LoadHatenadirStructure(Resource, path=os.path.join("hatenadir", "ds", "v2-xx")):
 	for root, dirs, files in os.walk(path):
 		if root <> path: continue#use recursion instead
