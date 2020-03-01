@@ -2,55 +2,28 @@ from twisted.internet import reactor
 import atexit, os
 from Hatenatools import TMB
 
+#Leafnote MySQL Implementation
+import mysql.connector
+
+leafconn = mysql.connector.connect(user="", password="", host="", database="")
+leafcur = leafconn.cursor()
+
 #The database handling flipnote files and info
-#this one stores them in plaintext, only works with one server worker
 class Database:
 	def __init__(self):
 		#read database stuff into memory:
-		if os.path.exists("database/new_flipnotes.dat"):
-			f = open("database/new_flipnotes.dat", "rb")#contains the newest 5000 flipnotes
-			file = f.read()
-			f.close()
-		else:
-			file = ""
-		
-		if file:
-			self.Newest = [tuple(i.split("\t")) for i in file.split("\n")]#[i] = [creatorID, filename]
-		else:
-			self.Newest = []
+		leafcur.execute("CREATE TABLE IF NOT EXISTS new_flipnotes (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, filename VARCHAR(24) NOT NULL)")
+		leafcur.execute("SELECT creatorid, filename FROM new_flipnotes ORDER BY id DESC LIMIT 5000")
+		file = leafcur.fetchall()
+
+		self.Newest = [file]#[creatorID, filename]
 		
 		self.Creator = {}#to store creator info updates before writing to disk. Creator[id][n] = [filename, views, stars, green stars, red stars, blue stars, purple stars, Channel, Downloads]
 		
-		#to check if an update is neccesary(caching):
-		self.new = False#True when new flipnotes has been uploaded
 		self.Views = 0
 		self.Stars = 0
 		self.Downloads = 0
 		
-		#schtuff
-		reactor.callLater(60*3, self.flusher)
-		atexit.register(self.write)
-	def flusher(self):#Automatically flushes the files every 3 minutes and trims down memory usage
-		reactor.callLater(60*3, self.flusher)
-		self.write()
-	def write(self):
-		if self.new:
-			#trim newest:
-			if len(self.Newest) > 5000:
-				self.Newest = self.Newest[:5000]
-			
-			#write to file:
-			f = open("database/new_flipnotes.dat", "wb")
-			f.write("\n".join(("\t".join(i) for i in self.Newest)))
-			f.close()
-			self.new = False
-		
-		#write creator changes to file:
-		for ID in self.Creator.keys():
-			f = open("database/Creators/%s/flipnotes.dat" % ID, "wb")
-			f.write("\n".join(("\t".join(map(str, i)) for i in self.Creator[ID])))
-			f.close()
-			del self.Creator[ID]
 	#interface:
 	def CreatorExists(self, CreatorID):
 		return os.path.exists("database/Creators/" + CreatorID) or (CreatorID in self.Creator)
@@ -63,9 +36,8 @@ class Database:
 			if not os.path.exists("database/Creators/" + CreatorID):
 				return None
 			
-			f = open("database/Creators/%s/flipnotes.dat" % CreatorID, "rb")
-			ret = [i.split("\t") for i in f.read().split("\n")]
-			f.close()
+			leafcur.execute("SELECT * FROM user_%s", CreatorID)
+			ret = [leafcur.fetchall()]
 			
 			#update to newer format:
 			#current format = [filename, views, stars, green stars, red stars, blue stars, purple stars, Channel, Downloads]
@@ -109,8 +81,10 @@ class Database:
 			return False
 		
 		#add to database:
-		self.new = True
-		self.Newest.insert(0, (CreatorID, filename))
+		leafcur.execute("CREATE TABLE IF NOT EXISTS user_%s (filename VARCHAR(24) NOT NULL KEY, views INT NOT NULL DEFAULT 0, stars INT NOT NULL DEFAULT 0, green_stars INT NOT NULL DEFAULT 0, red_stars INT NOT NULL DEFAULT 0, blue_stars INT NOT NULL DEFAULT 0, purple_stars INT NOT NULL DEFAULT 0, channel VARCHAR(255) NOT NULL DEFAULT '', downloads INT NOT NULL DEFAULT 0 ", CreatorID)
+		leafcur.execute("INSERT INTO new_flipnotes (creatorid, filename) VALUES (%s, %s)", (CreatorID, filename))
+		leafcur.execute("INSERT INTO user_%s (filename) VALUES (%s)", CreatorID, filename)
+		leafcur.commit()
 		
 		if not self.GetCreator(CreatorID, True):
 			self.Creator[CreatorID] = [[filename, 0, 0, 0, 0, 0, 0, Channel, 0]]
@@ -130,6 +104,8 @@ class Database:
 			if flipnote[0] == filename:
 				self.Creator[CreatorID][i][1] = int(flipnote[1]) + 1
 				self.Views += 1
+				leafcur.execute("UPDATE user_%s SET views ='%s' WHERE flipnote ='%s'", CreatorID, self.Views, filename)
+				leafcur.commit()
 				return True
 		return False
 	def AddStar(self, CreatorID, filename, amount=1):#todo: add support for other colored stars
@@ -137,6 +113,8 @@ class Database:
 			if flipnote[0] == filename:
 				self.Creator[CreatorID][i][2] = int(flipnote[2]) + amount
 				self.Stars += 1
+				leafcur.execute("UPDATE user_%s SET stars ='%s' WHERE flipnote ='%s'", CreatorID, self.Stars, filename)
+				leafcur.commit()
 				return True
 		return False
 	def AddDownload(self, CreatorID, filename):
@@ -144,6 +122,8 @@ class Database:
 			if flipnote[0] == filename:
 				self.Creator[CreatorID][i][8] = int(flipnote[8]) + 1
 				self.Downloads += 1
+				leafcur.execute("UPDATE user_%s SET downloads ='%s' WHERE flipnote ='%s'", CreatorID, self.Downloads, filename)
+				leafcur.commit()
 				return True
 		return False
 	#internal helpers:
