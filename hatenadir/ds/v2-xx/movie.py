@@ -2,7 +2,7 @@ from twisted.web import resource
 import os
 
 from hatena import Log, ServerLog, Silent, NotFound
-from DB import Database
+from database import Database
 from Hatenatools import TMB
 
 #The movie folder:

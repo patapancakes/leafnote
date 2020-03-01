@@ -3,7 +3,7 @@ from twisted.internet import reactor
 import time
 
 from hatena import Log, NotFound
-from DB import Database
+from database import Database
 from Hatenatools import UGO
 
 #makes a flipnote list of the newest flipnotes

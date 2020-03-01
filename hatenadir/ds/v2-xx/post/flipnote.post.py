@@ -3,7 +3,7 @@ from twisted.internet import reactor
 import time
 
 from hatena import ServerLog, Silent
-from DB import Database
+from database import Database
 from Hatenatools import TMB
 
 #Handle flipnote uploads

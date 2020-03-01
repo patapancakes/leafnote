@@ -19,7 +19,6 @@ else:
 		path = os.path.split(i)[0]
 		if not os.path.exists(os.path.join(path, "server.py")): continue
 		if not os.path.exists(os.path.join(path, "hatena.py")): continue
-		if not os.path.exists(os.path.join(path, "DB.py")): continue
 		os.chdir(path)
 		break
 	else:
@@ -99,7 +98,7 @@ Log = Log()
 
 #init database:
 print "Initializing flipnote database...",
-import DB
+from database import Database
 print "Done!"
 
 #Setup hatena server:
