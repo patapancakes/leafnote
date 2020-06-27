@@ -79,6 +79,8 @@ class PyResource(resource.Resource):
 		
 		#Flipnotes
 		for creatorid, filename in flipnotes:
+        		creatorid = creatorid.encode("ascii", "ignore")
+        		filename = filename.encode("ascii", "ignore")
 			stars = str(Database.GetFlipnote(creatorid, filename)[2])
 			ugo.Items.append(("button", 3, "", "http://flipnote.hatena.com/ds/v2-xx/movie/%s/%s.ppm" % (creatorid, filename), (stars, "765", "573", "0"), (filename+".ppm", Database.GetFlipnoteTMB(creatorid, filename))))
 		

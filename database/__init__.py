@@ -2,7 +2,12 @@ from twisted.internet import reactor
 import atexit, os
 from Hatenatools import TMB
 
-#Leafnote MySQL Implementation
+#Leafnote RegEx Implementation (Sanitize user-input easily)
+import re
+
+fnregex = re.compile("^[A-F0-9_]")
+
+#Leafnote MySQL Implementation (Use a database system that doesn't suck)
 import mysql.connector
 
 leafconn = mysql.connector.connect(user="", password="", host="", database="")
@@ -12,11 +17,11 @@ leafcur = leafconn.cursor()
 class Database:
 	def __init__(self):
 		#read database stuff into memory:
-		leafcur.execute("CREATE TABLE IF NOT EXISTS new_flipnotes (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, filename VARCHAR(24) NOT NULL)")
-		leafcur.execute("SELECT creatorid, filename FROM new_flipnotes ORDER BY id DESC LIMIT 5000")
-		file = leafcur.fetchall()
+		leafcur.execute("CREATE TABLE IF NOT EXISTS new_flipnotes (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, flipnote VARCHAR(24) NOT NULL)")
+		leafcur.execute("SELECT creatorid, flipnote FROM `new_flipnotes` ORDER BY id DESC LIMIT 5000")
+		file = [list(i) for i in leafcur.fetchall()]
 
-		self.Newest = [file]#[creatorID, filename]
+		self.Newest = file#[creatorID, filename]
 		
 		self.Creator = {}#to store creator info updates before writing to disk. Creator[id][n] = [filename, views, stars, green stars, red stars, blue stars, purple stars, Channel, Downloads]
 		
@@ -36,8 +41,8 @@ class Database:
 			if not os.path.exists("database/Creators/" + CreatorID):
 				return None
 			
-			leafcur.execute("SELECT * FROM user_%s", CreatorID)
-			ret = [leafcur.fetchall()]
+			leafcur.execute("SELECT * FROM `user_%s`" % (CreatorID))
+			ret = [list(i) for i in leafcur.fetchall()]
 			
 			#update to newer format:
 			#current format = [filename, views, stars, green stars, red stars, blue stars, purple stars, Channel, Downloads]
@@ -73,18 +78,20 @@ class Database:
 			return False
 		
 		#CreatorID = tmb.Username
-		CreatorID = tmb.EditorAuthorID
-		filename = tmb.CurrentFilename[:-4]
+		if fnregex.match(tmb.EditorAuthorID):
+			CreatorID = tmb.EditorAuthorID
+		if fnregex.match(tmb.CurrentFilename[:-4]):
+			filename = tmb.CurrentFilename[:-4]
 		del tmb
 		
 		if self.FlipnoteExists(CreatorID, filename):#already exists
 			return False
 		
 		#add to database:
-		leafcur.execute("CREATE TABLE IF NOT EXISTS user_%s (filename VARCHAR(24) NOT NULL KEY, views INT NOT NULL DEFAULT 0, stars INT NOT NULL DEFAULT 0, green_stars INT NOT NULL DEFAULT 0, red_stars INT NOT NULL DEFAULT 0, blue_stars INT NOT NULL DEFAULT 0, purple_stars INT NOT NULL DEFAULT 0, channel VARCHAR(255) NOT NULL DEFAULT '', downloads INT NOT NULL DEFAULT 0 ", CreatorID)
-		leafcur.execute("INSERT INTO new_flipnotes (creatorid, filename) VALUES (%s, %s)", (CreatorID, filename))
-		leafcur.execute("INSERT INTO user_%s (filename) VALUES (%s)", CreatorID, filename)
-		leafcur.commit()
+		leafcur.execute("CREATE TABLE IF NOT EXISTS `user_%s` (flipnote VARCHAR(24) NOT NULL KEY, views INT NOT NULL DEFAULT 0, stars INT NOT NULL DEFAULT 0, green_stars INT NOT NULL DEFAULT 0, red_stars INT NOT NULL DEFAULT 0, blue_stars INT NOT NULL DEFAULT 0, purple_stars INT NOT NULL DEFAULT 0, channel VARCHAR(255) NOT NULL DEFAULT '', downloads INT NOT NULL DEFAULT 0)" % CreatorID)
+		leafcur.execute("INSERT INTO `new_flipnotes` (creatorid, flipnote) VALUES ('%s', '%s')" % (CreatorID, filename))
+		leafcur.execute("INSERT INTO `user_%s` (flipnote) VALUES ('%s')" % (CreatorID, filename))
+		leafconn.commit()
 		
 		if not self.GetCreator(CreatorID, True):
 			self.Creator[CreatorID] = [[filename, 0, 0, 0, 0, 0, 0, Channel, 0]]
@@ -104,8 +111,8 @@ class Database:
 			if flipnote[0] == filename:
 				self.Creator[CreatorID][i][1] = int(flipnote[1]) + 1
 				self.Views += 1
-				leafcur.execute("UPDATE user_%s SET views ='%s' WHERE flipnote ='%s'", CreatorID, self.Views, filename)
-				leafcur.commit()
+				leafcur.execute("UPDATE `user_%s` SET views = %s WHERE flipnote = '%s'" % (CreatorID, self.Views, filename))
+				leafconn.commit()
 				return True
 		return False
 	def AddStar(self, CreatorID, filename, amount=1):#todo: add support for other colored stars
@@ -113,8 +120,8 @@ class Database:
 			if flipnote[0] == filename:
 				self.Creator[CreatorID][i][2] = int(flipnote[2]) + amount
 				self.Stars += 1
-				leafcur.execute("UPDATE user_%s SET stars ='%s' WHERE flipnote ='%s'", CreatorID, self.Stars, filename)
-				leafcur.commit()
+				leafcur.execute("UPDATE `user_%s` SET stars = %s WHERE flipnote = '%s'" % (CreatorID, self.Stars, filename))
+				leafconn.commit()
 				return True
 		return False
 	def AddDownload(self, CreatorID, filename):
@@ -122,8 +129,8 @@ class Database:
 			if flipnote[0] == filename:
 				self.Creator[CreatorID][i][8] = int(flipnote[8]) + 1
 				self.Downloads += 1
-				leafcur.execute("UPDATE user_%s SET downloads ='%s' WHERE flipnote ='%s'", CreatorID, self.Downloads, filename)
-				leafcur.commit()
+				leafcur.execute("UPDATE `user_%s` SET downloads = %s WHERE flipnote = '%s'" % (CreatorID, self.Downloads, filename))
+				leafconn.commit()
 				return True
 		return False
 	#internal helpers:
