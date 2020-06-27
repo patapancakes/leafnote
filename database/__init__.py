@@ -17,7 +17,7 @@ leafcur = leafconn.cursor()
 class Database:
 	def __init__(self):
 		#read database stuff into memory:
-		leafcur.execute("CREATE TABLE IF NOT EXISTS new_flipnotes (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, flipnote VARCHAR(24) NOT NULL)")
+		leafcur.execute("CREATE TABLE IF NOT EXISTS `new_flipnotes` (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, flipnote VARCHAR(24) NOT NULL)")
 		leafcur.execute("SELECT creatorid, flipnote FROM `new_flipnotes` ORDER BY id DESC LIMIT 5000")
 		file = [list(i) for i in leafcur.fetchall()]
 
