@@ -18,7 +18,7 @@ class Database:
 	def __init__(self):
 		#read database stuff into memory:
 		leafcur.execute("CREATE TABLE IF NOT EXISTS `flipnotes` (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, flipnote VARCHAR(24) NOT NULL, views INT NOT NULL DEFAULT 0, stars INT NOT NULL DEFAULT 0, green_stars INT NOT NULL DEFAULT 0, red_stars INT NOT NULL DEFAULT 0, blue_stars INT NOT NULL DEFAULT 0, purple_stars INT NOT NULL DEFAULT 0, channel VARCHAR(255) NOT NULL DEFAULT '', downloads INT NOT NULL DEFAULT 0)")
-		leafcur.execute("SELECT creatorid, flipnote FROM `flipnotes` ORDER BY id DESC LIMIT 5000")
+		leafcur.execute("SELECT creatorid, flipnote FROM `flipnotes` ORDER BY id DESC")
 		file = [list(i) for i in leafcur.fetchall()]
 
 		self.Newest = file#[creatorID, filename]
