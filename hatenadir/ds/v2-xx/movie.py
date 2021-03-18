@@ -158,13 +158,13 @@ class CreatorIDFileResource(resource.Resource):
 		
 		# Downloads:
 		name = "Downloads"
-		content = str(flipnote[8])
+		content = str(flipnote[4])
 		Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
 
 		#Channel:
-		#if flipnote[7]:#todo: make channels work at all
+		#if flipnote[3]:#todo: make channels work at all
 		#	name = "Channel"
-		#	content = 'a href="http://flipnote.hatena.com/ds/v2-xx/ch/%s.uls">%s</a>' % (flipnote[7], flipnote[7])
+		#	content = 'a href="http://flipnote.hatena.com/ds/v2-xx/ch/%s.uls">%s</a>' % (flipnote[3], flipnote[3])
 		#	Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
 		
 		#Comments:
