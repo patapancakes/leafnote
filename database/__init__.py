@@ -17,18 +17,23 @@ leafcur = leafconn.cursor()
 class Database:
 	def __init__(self):
 		#read database stuff into memory:
-		leafcur.execute("CREATE TABLE IF NOT EXISTS `flipnotes` (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, flipnote VARCHAR(24) NOT NULL, views INT NOT NULL DEFAULT 0, stars INT NOT NULL DEFAULT 0, green_stars INT NOT NULL DEFAULT 0, red_stars INT NOT NULL DEFAULT 0, blue_stars INT NOT NULL DEFAULT 0, purple_stars INT NOT NULL DEFAULT 0, channel VARCHAR(255) NOT NULL DEFAULT '', downloads INT NOT NULL DEFAULT 0)")
-		leafcur.execute("SELECT creatorid, flipnote FROM `flipnotes` ORDER BY id DESC")
-		file = [list(i) for i in leafcur.fetchall()]
+		leafcur.execute("CREATE TABLE IF NOT EXISTS `flipnotes` (id INT NOT NULL AUTO_INCREMENT KEY, creatorid VARCHAR(16) NOT NULL, flipnote VARCHAR(24) NOT NULL, views INT NOT NULL DEFAULT 0, stars INT NOT NULL DEFAULT 0, channel VARCHAR(255) NOT NULL DEFAULT '', downloads INT NOT NULL DEFAULT 0)")
+		leafcur.execute("SELECT creatorid, flipnote FROM `flipnotes` ORDER BY id DESC LIMIT 200")
+		flipnotes = [list(i) for i in leafcur.fetchall()]
 
-		self.Newest = file#[creatorID, filename]
+		self.Newest = flipnotes#[creatorID, filename]
 		
-		self.Creator = {}#to store creator info updates before writing to disk. Creator[id][n] = [filename, views, stars, green stars, red stars, blue stars, purple stars, Channel, Downloads]
+		self.Creator = {}#to store creator info updates before writing to disk. Creator[id][n] = [filename, views, stars, Channel, Downloads]
 		
 		self.Views = 0
 		self.Stars = 0
 		self.Downloads = 0
-		
+	
+        def UpdateList(self):
+            leafcur.execute("SELECT creatorid, flipnote FROM `flipnotes` ORDER BY id DESC LIMIT 200")
+            flipnotes = [list(i) for i in leafcur.fetchall()]
+
+            self.Newest = flipnotes#[creatorID, filename]
 	#interface:
 	def CreatorExists(self, CreatorID):
 		return os.path.exists("database/Creators/" + CreatorID) or (CreatorID in self.Creator)
@@ -41,15 +46,15 @@ class Database:
 			if not os.path.exists("database/Creators/" + CreatorID):
 				return None
 			
-			leafcur.execute("SELECT flipnote, views, stars, green_stars, red_stars, blue_stars, purple_stars, channel, downloads FROM `flipnotes` WHERE creatorid = '%s'" % (CreatorID))
+			leafcur.execute("SELECT flipnote, views, stars, channel, downloads FROM `flipnotes` WHERE creatorid = '%s'" % (CreatorID))
 			ret = [list(i) for i in leafcur.fetchall()]
 			
 			#update to newer format:
-			#current format = [filename, views, stars, green stars, red stars, blue stars, purple stars, Channel, Downloads]
+			#current format = [filename, views, stars, Channel, Downloads]
 			for i in xrange(len(ret)):
 				if len(ret[i]) < 9:
 					filename = ret[i][0]#take this as a give for now
-					for n, default in enumerate((filename, 0, 0, 0, 0, 0, 0, "", 0)):
+					for n, default in enumerate((filename, 0, 0, "", 0)):
 						if len(ret[i]) <= n:
 							ret[i].append(default)
 			
@@ -57,7 +62,7 @@ class Database:
 				self.Creator[CreatorID] = ret
 			
 			return ret
-	def GetFlipnote(self, CreatorID, filename, Store=False):#returns: [filename, views, stars, green stars, red stars, blue stars, purple stars, Channel, Downloads]
+	def GetFlipnote(self, CreatorID, filename, Store=False):#returns: [filename, views, stars, Channel, Downloads]
 		for i in (self.GetCreator(CreatorID, Store) or []):
 			if i[0] == filename:
 				return i
@@ -92,9 +97,9 @@ class Database:
 		leafconn.commit()
 		
 		if not self.GetCreator(CreatorID, True):
-			self.Creator[CreatorID] = [[filename, 0, 0, 0, 0, 0, 0, Channel, 0]]
+			self.Creator[CreatorID] = [[filename, 0, 0, Channel, 0]]
 		else:
-			self.Creator[CreatorID].append([filename, 0, 0, 0, 0, 0, 0, Channel, 0])
+			self.Creator[CreatorID].append([filename, 0, 0, Channel, 0])
 		
 		#write flipnote to file:
 		if not os.path.isdir("database/Creators/" + CreatorID):
@@ -125,7 +130,7 @@ class Database:
 	def AddDownload(self, CreatorID, filename):
 		for i, flipnote in enumerate(self.GetCreator(CreatorID, True) or []):
 			if flipnote[0] == filename:
-				self.Creator[CreatorID][i][8] = int(flipnote[8]) + 1
+				self.Creator[CreatorID][i][4] = int(flipnote[4]) + 1
 				self.Downloads += 1
 				leafcur.execute("UPDATE `flipnotes` SET downloads = %s WHERE flipnote = '%s'" % (self.Downloads, filename))
 				leafconn.commit()

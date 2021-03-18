@@ -20,7 +20,7 @@ class AccessDenied(resource.Resource):
 		print "debug:",request.getAllHeaders()
 		
 		request.setResponseCode(403)
-		return "403 - Access denied\nThis proxy is only intended for use on the DSi"
+		return "403 - Access denied"
 AccessDenied = AccessDenied()
 class NotFound(resource.Resource):
 	isLeaf = True
@@ -30,7 +30,7 @@ class NotFound(resource.Resource):
 		
 		ServerLog.write("%s got 404 when requesting \"%s\"" % (request.getClientIP(), path), Silent)
 		request.setResponseCode(404)
-		return "404 - Not Found\nThis proxy is only intended for use on the DSi"
+		return "404 - Not Found"
 NotFound = NotFound()
 class ConnectionTest(resource.Resource):#used for people setting up the proxy in their DSi. It's nice to see it's actually working.
 	#http://conntest.nintendowifi.net/
@@ -51,12 +51,6 @@ class Root(resource.Resource):#filters out non-hantena clients
 		self.cssResource = static.File("hatenadir/css/")
 		self.imagesResource = static.File("hatenadir/images/")
 	def getChild(self, name, request):
-		if "x-dsi-sid" not in request.getAllHeaders():
-			if "host" in request.getAllHeaders():
-				if request.getAllHeaders()["host"] == "conntest.nintendowifi.net":
-					return ConnectionTest
-			return AccessDenied
-		
 		if name == "ds":
 			return self.dsResource
 		elif name == "css":

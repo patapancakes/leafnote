@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ugo_xml>
+	<layout>
+		<value>0</value>
+	</layout>
+	<title>
+		<label />
+		<label />
+		<label />
+		<label />
+		<label />
+		<num>0</num>
+	</title>
+	<button>
+		<label>Post Mini-Flipnote</label>
+		<address>ugomemo://drawface</address>
+		<trait>0</trait>
+	</button>
+	<button>
+		<label>Post Flipnote</label>
+		<address>http://flipnote.hatena.com/ds/v2-xx/help/post_howto.htm</address>
+		<trait>0</trait>
+	</button>
+	
+</ugo_xml>

@@ -32,7 +32,7 @@ try:
 						stderr=null)
 	hasffmpeg = True
 except OSError:
-	print "Warning: ffmpeg not found, video export unavailable. Please make sure ffmepg is installed and can be accessed on your path."
+	#print "Warning: ffmpeg not found, video export unavailable. Please make sure ffmepg is installed and can be accessed on your path."
 	hasffmpeg = False
 
 #helpers:

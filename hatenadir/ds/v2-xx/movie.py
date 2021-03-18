@@ -142,15 +142,13 @@ class CreatorIDFileResource(resource.Resource):
 		
 		#Creator username:
 		name = "Creator"
-		#content = "<a href=\"http://flipnote.hatena.com/ds/ds/v2-xx/%s/profile.htm?t=260&pm=80\">%s</a>" % (CreatorID, tmb.EditorAuthorName)
-		content = '<a href="http://flipnote.hatena.com/ds/v2-xx/%s/profile.htm?t=260&pm=80\">%s</a>' % (CreatorID, tmb.Username)
+		content = '%s (%s)' % (tmb.Username, CreatorID) 
 		Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
 		
 		#Stars:
 		name = "Stars"
-		content = u'<a href="http://flipnote.hatena.com/ds/v2-xx/movie/%s/%s.htm?mode=stardetail"><span class="star0c">\u2605</span> <span class="star0">%s</span></a>' % (CreatorID, filename, flipnote[2])#yellow stars
-		#todo: add other stars
-		Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
+		content = u'<span class="star0c">\u2605</span> <span class="star0">%s</span>' % (flipnote[2])#yellow stars
+        Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
 		
 		#Views:
 		name = "Views"
@@ -163,10 +161,10 @@ class CreatorIDFileResource(resource.Resource):
 		Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
 
 		#Channel:
-		if flipnote[7]:#todo: make channels work at all
-			name = "Channel"
-			content = 'a href="http://flipnote.hatena.com/ds/v2-xx/ch/%s.uls">%s</a>' % (flipnote[7], flipnote[7])
-			Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
+		#if flipnote[7]:#todo: make channels work at all
+		#	name = "Channel"
+		#	content = 'a href="http://flipnote.hatena.com/ds/v2-xx/ch/%s.uls">%s</a>' % (flipnote[7], flipnote[7])
+		#	Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
 		
 		#Comments:
 		Comments = "0"
@@ -203,9 +201,6 @@ DetailsPageTemplate = """<html>
 				<td class="space"> </td>
 				<td class="tabon" align="center">
 					<div class="on" align="center">Description</div>
-				</td>
-				<td class="taboff" align="center">
-					<a class="taboff" href="http://flipnote.hatena.com/ds/v2-eu/movie/%%CreatorID%%/%%Filename%%.htm?mode=commentshalfsize">Comments(%%CommentCount%%)</a>
 				</td>
 			</tr>
 		</table>

@@ -5,14 +5,8 @@
 *.pyo
 *.lnk
 
-#is emberrasing... OwO'
-todo.txt
-
 #Don't need all of these on github
 logs
 
-#not clean enough for the public eye, this will be put up on the wiki section as i clean it up.
-documentation
-
-#muh server
-VPS
+database/Channels
+database/Creators

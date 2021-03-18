@@ -13,7 +13,7 @@
 	</title>
 	<button>
 		<label>Browse Flipnotes</label>
-		<address>http://flipnote.hatena.com/ds/v2-xx/frontpage/hotmovies.uls</address>
+		<address>http://flipnote.hatena.com/ds/v2-xx/frontpage/flipnotes.uls</address>
 		<trait>100</trait>
 		<value />
 		<value>0</value>

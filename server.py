@@ -12,17 +12,17 @@ import sys, time, os, atexit
 print " OK!"
 
 #set working directory
-if os.path.dirname(__file__):
-	os.chdir(os.path.dirname(__file__))
-else:
-	for i in sys.path:
-		path = os.path.split(i)[0]
-		if not os.path.exists(os.path.join(path, "server.py")): continue
-		if not os.path.exists(os.path.join(path, "hatena.py")): continue
-		os.chdir(path)
-		break
-	else:
-		print "Unable to set working directory, the server may crash!"
+#if os.path.dirname(__file__):
+#	os.chdir(os.path.dirname(__file__))
+#else:
+#	for i in sys.path:
+#		path = os.path.split(i)[0]
+#		if not os.path.exists(os.path.join(path, "server.py")): continue
+#		if not os.path.exists(os.path.join(path, "hatena.py")): continue
+#		os.chdir(path)
+#		break
+#	else:
+#		print "Unable to set working directory, the server may crash!"
 
 #Logging
 class Log:
