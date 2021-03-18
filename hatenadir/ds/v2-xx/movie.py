@@ -148,7 +148,8 @@ class CreatorIDFileResource(resource.Resource):
 		#Stars:
 		name = "Stars"
 		content = u'<span class="star0c">\u2605</span> <span class="star0">%s</span>' % (flipnote[2])#yellow stars
-        Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
+        #todo: add other stars
+		Entries.append(PageEntryTemplate.replace("%%Name%%", name).replace("%%Content%%", content))
 		
 		#Views:
 		name = "Views"
