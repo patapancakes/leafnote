@@ -30,8 +30,10 @@ class PyResource(resource.Resource):
 			return NotFound.render(request)
 	#===
 	def Update(self):#called every minute
-		reactor.callLater(60, self.Update)
-		
+		reactor.callLater(5, self.Update)
+	
+                Database.UpdateList()
+
 		if self.newestflip <> Database.Newest[0]:
 			self.newestflip = Database.Newest[0]
 			reactor.callInThread(self.UpdateThreaded, Database.Newest)
