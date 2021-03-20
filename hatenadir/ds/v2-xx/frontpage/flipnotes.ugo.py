@@ -29,7 +29,7 @@ class PyResource(resource.Resource):
 		else:
 			return NotFound.render(request)
 	#===
-	def Update(self):#called every minute
+	def Update(self):#called every 5 seconds
 		reactor.callLater(5, self.Update)
 		Database.UpdateList()
 		if self.newestflip <> Database.Newest[0]:
